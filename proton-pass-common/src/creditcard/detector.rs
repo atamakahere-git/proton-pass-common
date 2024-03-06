@@ -1,4 +1,3 @@
-use luhn::valid;
 use regex::Regex;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -49,22 +48,10 @@ impl CreditCardDetector {
     pub fn detect(&self, number: &str) -> CreditCardType {
         let cleaned_card_number: String = number.chars().filter(char::is_ascii_digit).collect();
 
-        let mut card = None;
-        for (card_type, pattern) in self.regexes.iter() {
-            if pattern.is_match(&cleaned_card_number) {
-                card = Some(card_type.clone());
-                break;
-            }
-        }
-        match card {
-            None => CreditCardType::Unknown,
-            Some(c) => {
-                if valid(&cleaned_card_number) {
-                    c
-                } else {
-                    CreditCardType::Unknown
-                }
-            }
-        }
+        self.regexes
+            .iter()
+            .find_map(|(card_type, regex)| regex.is_match(&cleaned_card_number).then_some(card_type))
+            .cloned()
+            .unwrap_or(CreditCardType::Unknown)
     }
 }
