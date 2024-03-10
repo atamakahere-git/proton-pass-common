@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use super::passkey_handling::{get_authenticator, parse_url, serialize_passkey};
 use super::{PasskeyError, PasskeyResult, ProtonPassKey};
 use coset::iana;
@@ -34,12 +36,12 @@ impl CreatePasskeyResponse {
     }
 }
 
-fn vec_to_hex(vec: &[u8]) -> String {
-    let mut output = String::new();
+pub fn vec_to_hex(vec: &[u8]) -> String {
+    let mut hex_string = String::with_capacity(vec.len() * 2);
     for byte in vec {
-        output.push_str(&format!("{:02X}", byte))
+        write!(&mut hex_string, "{:02X}", byte).expect("Failed to write");
     }
-    output
+    hex_string
 }
 
 async fn generate_passkey_response(
