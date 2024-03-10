@@ -1,5 +1,5 @@
 use super::{PassphraseConfig, PasswordGeneratorError, RandomPasswordConfig, WordSeparator};
-use rand::Rng;
+use rand::{seq::SliceRandom, Rng};
 
 include!(concat!(env!("OUT_DIR"), "/wordlists.rs"));
 
@@ -129,12 +129,12 @@ where
     }
 
     fn get_word(&mut self) -> Result<String> {
-        let range = 0..EFF_LARGE_WORDLIST.len();
-        let idx = self.rng.gen_range(range);
-        let word = EFF_LARGE_WORDLIST
-            .get(idx)
-            .ok_or_else(|| PasswordGeneratorError::FailToGenerate("Could not get word from wordlist".to_string()))?;
-        Ok(word.to_string())
+        EFF_LARGE_WORDLIST
+            .choose(&mut self.rng)
+            .map(ToString::to_string)
+            .ok_or(PasswordGeneratorError::FailToGenerate(
+                "Could not get word from wordlist".to_string(),
+            ))
     }
 
     fn join_with_separator(&mut self, words: Vec<String>, separator: &WordSeparator) -> Result<String> {
