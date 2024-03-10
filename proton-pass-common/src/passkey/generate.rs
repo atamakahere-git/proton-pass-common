@@ -124,16 +124,16 @@ pub struct CreatePasskeyIosRequest {
 
 pub async fn generate_passkey_for_ios(ios_request: CreatePasskeyIosRequest) -> PasskeyResult<CreatePasskeyResponse> {
     let url = parse_url(&ios_request.service_identifier)?;
-    let mut pub_key_cred_params = vec![];
 
-    for algorithm in ios_request.supported_algorithms {
-        if let Some(alg) = iana::Algorithm::from_i64(algorithm) {
-            pub_key_cred_params.push(PublicKeyCredentialParameters {
-                ty: PublicKeyCredentialType::PublicKey,
-                alg,
-            });
-        }
-    }
+    let pub_key_cred_params = ios_request
+        .supported_algorithms
+        .into_iter()
+        .flat_map(iana::Algorithm::from_i64)
+        .map(|alg| PublicKeyCredentialParameters {
+            ty: PublicKeyCredentialType::PublicKey,
+            alg,
+        })
+        .collect();
 
     let options = PublicKeyCredentialCreationOptions {
         rp: PublicKeyCredentialRpEntity {
