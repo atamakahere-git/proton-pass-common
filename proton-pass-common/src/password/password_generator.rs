@@ -26,13 +26,7 @@ where
     }
 
     pub fn random_words(&mut self, count: usize) -> Result<Vec<String>> {
-        let mut res = Vec::new();
-
-        for _ in 0..count {
-            res.push(self.get_word()?);
-        }
-
-        Ok(res)
+        Ok(vec![self.get_word()?; count])
     }
 
     pub fn generate_passphrase_from_words(&mut self, words: Vec<String>, spec: &PassphraseConfig) -> Result<String> {
